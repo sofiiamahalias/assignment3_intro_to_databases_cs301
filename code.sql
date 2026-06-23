@@ -68,7 +68,7 @@ begin
 		)
 		values ( 
 			p_customer_id, 
-			0, --за умовою завданян встановлюємо нуль
+			0, --за умовою завдання встановлюємо нуль
 			current_timestamp --теперішню дату
 		);
     else
@@ -78,3 +78,27 @@ end;
 $$ language plpgsql;
 call create_order(1); --перевірка чи працює процедура
 
+--TASK 3
+create or replace procedure add_product_to_order(p_order_id int, p_product_id int, p_quantity int)
+as $$
+declare
+product_price numeric(10,2); --створила змінні для збереження ціни та кількості
+	product_stock int;
+begin
+	if p_quantity<=0 then --перевірка введеної кількості (має бути строго більше нуля)
+		raise exception 'Quantity must be more than zero';
+end if;
+select price, stock_quantity --отримала з таблиці значенння 
+into product_price, product_stock
+from products
+where product_id=p_product_id;
+if product_stock<p_quantity then --перевірка чи достатньо на складі одиниць
+		raise exception 'Not enough items left';
+end if;
+insert into order_items(order_id,product_id,quantity,price) --якщо достатня кількість, вставляю значення в рядок
+values (p_order_id,p_product_id,p_quantity,product_price);
+update products
+set stock_quantity=stock_quantity-p_quantity --оновлюю (зменшую) після замовлення кількість на складі
+where product_id=p_product_id;
+end;
+$$language plpgsql;
