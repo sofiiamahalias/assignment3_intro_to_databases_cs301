@@ -51,3 +51,30 @@ return total;
 end;
 $$language plpgsql;
 select calculate_order_total(2); --перевірка чи працює функція
+
+--TASK 2
+create or replace procedure create_order(p_customer_id int)
+as $$
+begin
+	if exists ( --перевірка чи існує користувач
+		select customer_id 
+		from customers 
+		where customer_id=p_customer_id
+	) then --якщо користувач є, відбувається вставка значень
+		insert into orders (
+		customer_id,
+		total_amount,
+		order_date
+		)
+		values ( 
+			p_customer_id, 
+			0, --за умовою завданян встановлюємо нуль
+			current_timestamp --теперішню дату
+		);
+    else
+		raise exception 'Customer does not exist'; --у випадку, якщо користувача не інсує
+    end if;
+end;
+$$ language plpgsql;
+call create_order(1); --перевірка чи працює процедура
+
