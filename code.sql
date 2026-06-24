@@ -119,3 +119,19 @@ after insert or delete or update --спрацьовую після цих дій
 on order_items
 for each row --для кожного рядка, де відбулися зміни
 execute function update_order_total(); --виклик функції оновлення замовлення
+                       
+--TASK 5
+create or replace function add_order_log() 
+returns trigger
+as $$
+begin
+insert into order_log(order_id,customer_id,action,log_date)
+values(new.order_id,new.customer_id,'order is created',current_timestamp); --вставляю значення в таблицю order_log
+return new; --повертаю новий рядок після вставки значень
+end;
+$$ language plpgsql;
+create trigger trigger_order_log
+after insert
+on orders
+for each row
+execute function add_order_log(); --виклик попередньо створеної функції
