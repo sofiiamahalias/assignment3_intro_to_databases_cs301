@@ -135,3 +135,27 @@ after insert
 on orders
 for each row
 execute function add_order_log(); --виклик попередньо створеної функції
+
+--TASK 6
+insert into  customers(full_name,email,balance)
+values('Ivan Shevchenko', 'ivan@gmail.com',123.45); --створення клієнта
+
+insert into products(product_name,price,stock_quantity)
+values('IPhone', 4500.00,10); --створення продукту
+
+call create_order(1); --перевірка створення замовлень через процедуру
+
+call add_product_to_order(4,1,5); --перевірка додавання товару через процедуру
+
+select calculate_order_total(4); --перевірка роботи функції
+
+select order_id,total_amount
+from orders
+where order_id=4; --перевірка, чи оновлюється сума замовлення
+
+select product_id,stock_quantity
+from products
+where product_id=1; --перевірка, чи зменшилась кількість товару на складі
+
+select *
+from order_log; --перевірка записів в таблицю order_log
